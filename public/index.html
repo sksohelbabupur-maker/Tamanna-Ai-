@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>তামান্না AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+    }
+
+    .app {
+      max-width: 600px;
+      height: 100vh;
+      margin: auto;
+      background: white;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #111;
+      color: white;
+      padding: 18px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+    }
+
+    .message {
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 12px;
+      max-width: 80%;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+
+    .user {
+      background: #dbeafe;
+      margin-left: auto;
+    }
+
+    .ai {
+      background: #eeeeee;
+      margin-right: auto;
+    }
+
+    .bottom {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+    }
+
+    input {
+      flex: 1;
+      padding: 13px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 13px 18px;
+      border: none;
+      border-radius: 10px;
+      background: #111;
+      color: white;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <header>
+      🤖 তামান্না AI
+    </header>
+
+    <div id="chat">
+      <div class="message ai">
+        হ্যালো! আমি তামান্না AI। 😊<br>
+        আমাকে কিছু জিজ্ঞেস করো।
+      </div>
+    </div>
+
+    <div class="bottom">
+      <input
+        id="message"
+        type="text"
+        placeholder="এখানে লিখুন..."
+        onkeydown="if(event.key==='Enter') sendMessage()"
+      >
+
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+  </div>
+
+  <script>
+    async function sendMessage() {
+
+      const input = document.getElementById("message");
+      const chat = document.getElementById("chat");
+
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      chat.innerHTML += `
+        <div class="message user">
+          ${message}
+        </div>
+      `;
+
+      input.value = "";
+
+      const loading = document.createElement("div");
+      loading.className = "message ai";
+      loading.innerText = "তামান্না AI ভাবছে... 🤔";
+
+      chat.appendChild(loading);
+      chat.scrollTop = chat.scrollHeight;
+
+      try {
+
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: message
+          })
+        });
+
+        const data = await response.json();
+
+        loading.innerText =
+          data.reply || "কোনো উত্তর পাওয়া যায়নি।";
+
+      } catch (error) {
+
+        loading.innerText =
+          "দুঃখিত, সার্ভারে সমস্যা হয়েছে।";
+
+      }
+
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+
+</body>
+</html>
